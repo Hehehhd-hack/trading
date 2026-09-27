@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EDGE — Day Trading Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #06070a;
+  --bg-2: #0b0d12;
+  --surface: rgba(20, 23, 32, 0.72);
+  --surface-2: rgba(28, 32, 44, 0.6);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-2: rgba(255, 255, 255, 0.12);
+  --text: #e8ecf2;
+  --text-dim: #8a93a6;
+  --text-mute: #5c6473;
+  --accent: #00ffa3;
+  --accent-2: #22d3ee;
+  --red: #ff4d6d;
+  --green: #00ffa3;
+  --radius: 14px;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Ticker */
+.ticker-wrap {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 32px; background: #04050a;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden; z-index: 100;
+}
+.ticker {
+  display: inline-flex; white-space: nowrap;
+  animation: scroll 45s linear infinite;
+  height: 100%; align-items: center;
+}
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 22px; font-family: var(--mono);
+  font-size: 12px; letter-spacing: 0.3px;
+}
+.ticker-item .sym { color: var(--text-dim); }
+.ticker-item .px { color: var(--text); }
+.ticker-item.up .chg { color: var(--green); }
+.ticker-item.down .chg { color: var(--red); }
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Nav */
+.nav {
+  position: fixed; top: 32px; left: 0; right: 0;
+  z-index: 90; backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(6, 7, 10, 0.65);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1240px; margin: 0 auto;
+  padding: 14px 28px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 24px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { color: var(--accent); font-size: 18px; text-shadow: 0 0 14px rgba(0,255,163,0.5); }
+.brand-name { font-weight: 800; letter-spacing: 3px; font-size: 15px; }
+.brand-sub {
+  color: var(--text-mute); font-size: 11px;
+  font-family: var(--mono); border-left: 1px solid var(--border-2);
+  padding-left: 10px; letter-spacing: 0.5px;
+}
+.nav-links { display: flex; gap: 26px; }
+.nav-links a {
+  color: var(--text-dim); text-decoration: none;
+  font-size: 13.5px; font-weight: 500; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-cta {
+  background: var(--accent); color: #05140e;
+  border: none; padding: 9px 18px;
+  border-radius: 8px; font-weight: 700;
+  font-size: 13px; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  font-family: var(--sans);
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -8px rgba(0,255,163,0.5); }
+
+/* Hero */
+.hero { position: relative; padding: 180px 28px 90px; overflow: hidden; }
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(0,255,163,0.10), transparent 60%),
+    radial-gradient(ellipse 50% 50% at 90% 30%, rgba(34,211,238,0.08), transparent 60%),
+    linear-gradient(180deg, #06070a 0%, #080a10 100%);
+  z-index: -1;
+}
+.hero-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent 75%);
+}
+.hero-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+.hero-badge {
+  display: inline-block; font-family: var(--mono);
+  font-size: 11.5px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(0,255,163,0.25);
+  background: rgba(0,255,163,0.05); padding: 6px 14px;
+  border-radius: 100px; margin-bottom: 28px;
+}
+.hero-title {
+  font-size: clamp(38px, 6vw, 68px); font-weight: 800;
+  line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 22px;
+}
+.accent { color: var(--accent); text-shadow: 0 0 30px rgba(0,255,163,0.3); }
+.hero-sub {
+  color: var(--text-dim); font-size: 17px;
+  max-width: 640px; margin: 0 auto 36px; line-height: 1.65;
+}
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 54px; }
+.btn {
+  padding: 13px 26px; border-radius: 10px;
+  font-weight: 600; font-size: 14px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.2s;
+  font-family: var(--sans);
+}
+.btn-primary { background: var(--accent); color: #05140e; }
+.btn-primary:hover { box-shadow: 0 12px 32px -10px rgba(0,255,163,0.6); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text); border-color: var(--border-2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.hero-stats { display: flex; justify-content: center; gap: 56px; }
+.stat-num { font-size: 32px; font-weight: 800; font-family: var(--mono); color: var(--text); }
+.stat-lbl {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-mute); margin-top: 2px;
+}
+
+/* Sections */
+.section { max-width: 1240px; margin: 0 auto; padding: 90px 28px; }
+.section-head { margin-bottom: 44px; }
+.section-head h2 { font-size: 36px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 10px; }
+.section-head p { color: var(--text-dim); font-size: 16px; max-width: 640px; }
+
+/* Tabs */
+.tier-tabs { display: flex; gap: 8px; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+.tier-tab {
+  background: none; border: none; color: var(--text-mute);
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  padding: 12px 22px; cursor: pointer;
+  position: relative; transition: color 0.2s;
+}
+.tier-tab:hover { color: var(--text); }
+.tier-tab.active { color: var(--accent); }
+.tier-tab.active::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 2px; background: var(--accent);
+  box-shadow: 0 0 12px rgba(0,255,163,0.6);
+}
+
+/* Guides */
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+.guide-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 26px;
+  cursor: pointer; transition: all 0.25s;
+  position: relative; overflow: hidden;
+}
+.guide-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  opacity: 0; transition: opacity 0.25s;
+}
+.guide-card:hover { border-color: var(--border-2); transform: translateY(-3px); background: var(--surface-2); }
+.guide-card:hover::before { opacity: 1; }
+.guide-num { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 1.5px; margin-bottom: 12px; }
+.guide-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.3px; }
+.guide-card p { color: var(--text-dim); font-size: 13.5px; line-height: 1.6; margin-bottom: 16px; }
+.guide-meta {
+  display: flex; gap: 12px; font-family: var(--mono);
+  font-size: 11px; color: var(--text-mute);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 200; display: none; align-items: center;
+  justify-content: center; padding: 40px 20px;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: linear-gradient(180deg, #0d1016, #0a0c12);
+  border: 1px solid var(--border-2); border-radius: 18px;
+  max-width: 820px; width: 100%; max-height: 85vh;
+  overflow-y: auto; padding: 44px; position: relative;
+}
+.modal::-webkit-scrollbar { width: 8px; }
+.modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.modal-close {
+  position: absolute; top: 18px; right: 18px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  color: var(--text-dim); width: 34px; height: 34px;
+  border-radius: 8px; cursor: pointer; font-size: 18px;
+  line-height: 1; transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(255,77,109,0.15); color: var(--red); border-color: rgba(255,77,109,0.4); }
+.modal-tier {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.modal h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 20px; }
+.modal-body h3 {
+  font-size: 17px; font-weight: 700; margin: 26px 0 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.modal-body h3::before {
+  content: ''; width: 3px; height: 16px;
+  background: var(--accent); border-radius: 2px;
+}
+.modal-body p { color: var(--text-dim); font-size: 15px; line-height: 1.75; margin-bottom: 14px; }
+.modal-body ul { list-style: none; margin: 12px 0 18px; padding: 0; }
+.modal-body li {
+  color: var(--text-dim); font-size: 14.5px; line-height: 1.7;
+  padding-left: 22px; position: relative; margin-bottom: 8px;
+}
+.modal-body li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+.modal-body code {
+  font-family: var(--mono); background: rgba(0,255,163,0.08);
+  color: var(--accent); padding: 2px 6px;
+  border-radius: 4px; font-size: 13px;
+}
+.modal-body .callout {
+  background: rgba(0,255,163,0.05); border-left: 3px solid var(--accent);
+  padding: 14px 18px; border-radius: 0 8px 8px 0;
+  margin: 18px 0; font-size: 14px; color: var(--text);
+}
+
+/* Market */
+.market-controls {
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 20px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.search {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); padding: 11px 16px;
+  border-radius: 10px; font-family: var(--sans);
+  font-size: 14px; width: 280px; max-width: 100%;
+  transition: border-color 0.2s;
+}
+.search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,255,163,0.1); }
+.search::placeholder { color: var(--text-mute); }
+.market-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text-mute); letter-spacing: 0.5px;
+}
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 0 rgba(0,255,163,0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0,255,163,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0,255,163,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,163,0); }
+}
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.market-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.market-table thead th {
+  text-align: left; padding: 14px 18px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text-mute); background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none; transition: color 0.2s;
+}
+.market-table thead th:hover { color: var(--accent); }
+.market-table tbody td {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 13.5px; color: var(--text);
+}
+.market-table tbody tr { transition: background 0.15s; }
+.market-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+.market-table tbody tr:last-child td { border-bottom: none; }
+.sym-cell { color: var(--accent); font-weight: 700; letter-spacing: 0.5px; }
+.name-cell { font-family: var(--sans); color: var(--text-dim); font-size: 13.5px; }
+.up { color: var(--green); }
+.down { color: var(--red); }
+
+/* Tools */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; }
+.tool-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.tool-desc { color: var(--text-mute); font-size: 13px; margin-bottom: 18px; }
+.tool-card label {
+  display: block; font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-mute); margin-bottom: 12px;
+}
+.tool-card input {
+  display: block; width: 100%; margin-top: 6px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+  color: var(--text); padding: 9px 12px;
+  border-radius: 8px; font-family: var(--mono); font-size: 14px;
+}
+.tool-card input:focus { outline: none; border-color: var(--accent); }
+.tool-out {
+  margin-top: 18px; padding: 14px;
+  background: rgba(0,255,163,0.06);
+  border: 1px solid rgba(0,255,163,0.15);
+  border-radius: 8px; font-family: var(--mono);
+  font-size: 14px; color: var(--accent);
+  text-align: center; font-weight: 600;
+}
+.tool-out.bad { background: rgba(255,77,109,0.06); border-color: rgba(255,77,109,0.15); color: var(--red); }
+
+/* Rules */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.rule-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  transition: border-color 0.2s;
+}
+.rule-card:hover { border-color: rgba(0,255,163,0.3); }
+.rule-num { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 2px; margin-bottom: 14px; }
+.rule-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.rule-card p { color: var(--text-dim); font-size: 13.5px; line-height: 1.65; }
+
+/* Footer */
+.footer { border-top: 1px solid var(--border); padding: 50px 28px; margin-top: 60px; }
+.footer-inner { max-width: 1240px; margin: 0 auto; text-align: center; }
+.footer-brand {
+  font-weight: 800; letter-spacing: 3px; font-size: 15px;
+  margin-bottom: 16px; display: inline-flex; align-items: center; gap: 8px;
+}
+.footer-note { color: var(--text-mute); font-size: 13px; margin-bottom: 10px; }
+.footer-copy { color: var(--text-mute); font-size: 12px; font-family: var(--mono); }
+
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .nav-inner { padding: 12px 18px; }
+  .hero { padding: 140px 18px 60px; }
+  .section { padding: 60px 18px; }
+  .hero-stats { gap: 32px; }
+  .stat-num { font-size: 24px; }
+  .modal { padding: 30px 22px; }
+  .search { width: 100%; }
+  .market-table thead th:nth-child(2),
+  .market-table tbody td:nth-child(2),
+  .market-table thead th:nth-child(6),
+  .market-table tbody td:nth-child(6) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap"><div class="ticker" id="ticker"></div></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <span class="brand-mark">◢</span>
+      <span class="brand-name">EDGE</span>
+      <span class="brand-sub">day trading guide</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#guides">Guides</a>
+      <a href="#market">Market</a>
+      <a href="#tools">Tools</a>
+      <a href="#risk">Risk</a>
+    </nav>
+    <button class="nav-cta" data-scroll-to="#guides">Start Learning</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">Free · No Signup · Full Curriculum</div>
+    <h1 class="hero-title">Learn to trade the <span class="accent">session</span>,<br/>not the noise.</h1>
+    <p class="hero-sub">A complete, no-fluff day trading curriculum — from candlesticks and Level 2 to execution psychology and risk math. Built for people who want to actually understand what's happening on the tape.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" data-scroll-to="#guides">Beginner Track</button>
+      <button class="btn btn-ghost" data-scroll-to="#market">Live Market Panel</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-lbl">Tracks</div></div>
+      <div class="stat"><div class="stat-num">24</div><div class="stat-lbl">Lessons</div></div>
+      <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">Cost</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="guides" class="section">
+  <div class="section-head">
+    <h2>Curriculum</h2>
+    <p>Pick your level. Every lesson is self-contained, with a "why it matters" and a "do this next."</p>
+  </div>
+  <div class="tier-tabs">
+    <button class="tier-tab active" data-tier="beginner">Beginner</button>
+    <button class="tier-tab" data-tier="advanced">Advanced</button>
+    <button class="tier-tab" data-tier="expert">Expert</button>
+  </div>
+  <div class="guides-grid" id="guidesGrid"></div>
+</section>
+
+<section id="market" class="section">
+  <div class="section-head">
+    <h2>Market Panel</h2>
+    <p>Watchlist, sortable. Sparkline per ticker, % change, volume, and a live-update tick. Data refreshes every few seconds.</p>
+  </div>
+  <div class="market-controls">
+    <input type="text" id="searchInput" placeholder="Filter tickers or names…" class="search" />
+    <div class="market-meta">
+      <span class="pulse-dot"></span>
+      <span id="lastUpdate">live</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="market-table">
+      <thead>
+        <tr>
+          <th data-sort="symbol">Symbol</th>
+          <th data-sort="name">Name</th>
+          <th data-sort="price">Price</th>
+          <th data-sort="change">Change</th>
+          <th data-sort="changePct">%</th>
+          <th data-sort="volume">Volume</th>
+          <th>Chart</th>
+        </tr>
+      </thead>
+      <tbody id="marketBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="tools" class="section">
+  <div class="section-head">
+    <h2>Trader's Toolbox</h2>
+    <p>Calculators you'll actually use before and during a session.</p>
+  </div>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <h3>Position Size</h3>
+      <p class="tool-desc">How many shares for a given risk.</p>
+      <label>Account Size ($)<input type="number" id="psAccount" value="25000" /></label>
+      <label>Risk per Trade (%)<input type="number" id="psRisk" value="1" step="0.1" /></label>
+      <label>Entry Price ($)<input type="number" id="psEntry" value="50" /></label>
+      <label>Stop Price ($)<input type="number" id="psStop" value="48.5" /></label>
+      <div class="tool-out" id="psOut">—</div>
+    </div>
+    <div class="tool-card">
+      <h3>Risk / Reward</h3>
+      <p class="tool-desc">Is this trade worth taking?</p>
+      <label>Entry ($)<input type="number" id="rrEntry" value="50" /></label>
+      <label>Stop ($)<input type="number" id="rrStop" value="48.5" /></label>
+      <label>Target ($)<input type="number" id="rrTarget" value="54" /></label>
+      <div class="tool-out" id="rrOut">—</div>
+    </div>
+    <div class="tool-card">
+      <h3>Break-even Win Rate</h3>
+      <p class="tool-desc">Minimum WR for a given R:R.</p>
+      <label>Reward ($)<input type="number" id="beReward" value="3" /></label>
+      <label>Risk ($)<input type="number" id="beRisk" value="1" /></label>
+      <div class="tool-out" id="beOut">—</div>
+    </div>
+  </div>
+</section>
+
+<section id="risk" class="section">
+  <div class="section-head">
+    <h2>Risk Rules</h2>
+    <p>Non-negotiable. Tape these to your monitor.</p>
+  </div>
+  <div class="rules-grid">
+    <div class="rule-card"><div class="rule-num">01</div><h4>1% Rule</h4><p>Never risk more than 1% of account on a single trade. 3 losses in a row = still alive.</p></div>
+    <div class="rule-card"><div class="rule-num">02</div><h4>Define the Stop First</h4><p>If you can't name the invalidation price before entry, you don't have a trade — you have a hope.</p></div>
+    <div class="rule-card"><div class="rule-num">03</div><h4>Daily Max Loss</h4><p>Hit 3% down on the day? Close the platform. Tomorrow exists. Today's tilt does not get funded.</p></div>
+    <div class="rule-card"><div class="rule-num">04</div><h4>Two Setups, Max</h4><p>Master two patterns. One is a scalpel, one is a hammer. Everything else is noise.</p></div>
+    <div class="rule-card"><div class="rule-num">05</div><h4>Journal Every Trade</h4><p>Screenshot, thesis, outcome, emotion. Data beats memory every single time.</p></div>
+    <div class="rule-card"><div class="rule-num">06</div><h4>Size Down When Wrong</h4><p>Losing streak = reduce size, not increase it. Revenge sizing is how accounts die.</p></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand"><span class="brand-mark">◢</span> EDGE</div>
+    <p class="footer-note">Educational content only. Markets carry risk. Trade your plan, not your feelings.</p>
+    <p class="footer-copy">© <span id="year"></span> EDGE. Built for traders, by traders.</p>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">×</button>
+    <div class="modal-tier" id="modalTier"></div>
+    <h2 id="modalTitle"></h2>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   GUIDES DATA
+   ============================================================ */
+const GUIDES = {
+  beginner: [
+    {
+      n: "01",
+      title: "What Day Trading Actually Is",
+      desc: "Intraday speculation. Open and close within the same session. No overnight risk, no dividends, no 'long-term hold.'",
+      time: "8 min",
+      level: "Foundation",
+      body: `
+        <h3>Definition</h3>
+        <p>Day trading is the practice of entering and exiting positions within the same trading day. You do not carry risk overnight. You do not collect dividends. You are trading <em>movement</em> — price displacement from point A to point B, captured and closed.</p>
+        <h3>Why It Matters</h3>
+        <p>Because overnight gap risk is removed, you can trade with tighter stops and higher relative size than a swing trader. That is the appeal. The cost is that you must be <em>right quickly</em> — there is no time for a thesis to develop.</p>
+        <h3>The Three Things You Are Actually Trading</h3>
+        <ul>
+          <li><strong>Liquidity</strong> — where resting orders sit, and who is forced to cross the spread.</li>
+          <li><strong>Volatility</strong> — how far price travels per unit of time. No range = no trade.</li>
+          <li><strong>Sentiment</strong> — the emotional state of the participants. Fear and greed create the inefficiencies you harvest.</li>
+        </ul>
+        <div class="callout">If you cannot explain why price should move from your entry to your target in one sentence, you do not have a trade. You have a feeling.</div>
+        <h3>Do This Next</h3>
+        <p>Open a chart of SPY on a 5-minute timeframe. Watch one full session. Note the first 30 minutes, the lunch lull, and the closing hour. That rhythm is the same every day. Learn it.</p>
+      `
+    },
+    {
+      n: "02",
+      title: "Candlesticks & Timeframes",
+      desc: "Every candle is a fight. Body = conviction. Wick = rejection. Learn to read the story in four numbers.",
+      time: "10 min",
+      level: "Foundation",
+      body: `
+        <h3>Anatomy</h3>
+        <p>Each candlestick encodes four prices: <code>Open</code>, <code>High</code>, <code>Low</code>, <code>Close</code>. The body spans open→close. The wicks span the extremes.</p>
+        <ul>
+          <li><strong>Long body, short wicks</strong> — one side dominated. Momentum.</li>
+          <li><strong>Long upper wick</strong> — buyers pushed, sellers slapped them back. Rejection.</li>
+          <li><strong>Long lower wick</strong> — sellers pushed, buyers absorbed. Support.</li>
+          <li><strong>Tiny body, both wicks</strong> — indecision. Doji. Wait.</li>
+        </ul>
+        <h3>Timeframe Discipline</h3>
+        <p>Pick a <em>primary</em> timeframe (1m, 5m, 15m). That is your execution chart. Then go one timeframe up for context (the "higher timeframe" or HTF). If your execution chart says long but the HTF says down, you are fighting the current. Do not fight the current.</p>
+        <div class="callout">The chart you look at most should be the one you trade. Everything else is context.</div>
+        <h3>Do This Next</h3>
+        <p>On a 5-minute chart, mark every candle with a wick longer than its body. Note what price did in the next five candles. You are now studying rejection.</p>
+      `
+    },
+    {
+      n: "03",
+      title: "Support, Resistance, and Levels",
+      desc: "Price has memory. Levels are where memory is strongest — and where the reaction will be violent.",
+      time: "12 min",
+      level: "Foundation",
+      body: `
+        <h3>What a Level Is</h3>
+        <p>A horizontal zone where buying or selling was previously aggressive enough to reverse or stall price. Not a line. A <em>zone</em>, usually a few cents to a few dollars wide depending on the instrument.</p>
+        <h3>How to Draw Them</h3>
+        <ul>
+          <li>Use the HTF (daily, 4H) to mark major levels.</li>
+          <li>Use your execution timeframe to refine edges of the zone.</li>
+          <li>Prefer levels that produced a strong reaction <em>more than once</em>.</li>
+          <li>Prefer levels with a clear rejection wick on the touch.</li>
+        </ul>
+        <h3>Flip Zones</h3>
+        <p>The most powerful levels are <em>flips</em>: former resistance that becomes support (or vice versa) after a clean break. The market remembers. When price returns, the role reverses.</p>
+        <div class="callout">If you find yourself drawing fifteen lines, you have no levels. Three to five clean levels per instrument. No more.</div>
+        <h3>Do This Next</h3>
+        <p>Mark yesterday's high, low, and close on today's chart before the open. Those three lines are the skeleton of today's session.</p>
+      `
+    },
+    {
+      n: "04",
+      title: "Order Types You Actually Use",
+      desc: "Market, limit, stop, stop-limit. Know which one protects you and which one betrays you.",
+      time: "8 min",
+      level: "Foundation",
+      body: `
+        <h3>The Four</h3>
+        <ul>
+          <li><strong>Market</strong> — fill now, at whatever price. Fast, but slippage can hurt on thin names.</li>
+          <li><strong>Limit</strong> — fill only at your price or better. Patient, but you may miss the move.</li>
+          <li><strong>Stop</strong> — becomes a market order when price touches the trigger. This is your exit.</li>
+          <li><strong>Stop-Limit</strong> — becomes a limit order at the trigger. Protects against slippage, but can leave you stranded if price blows through.</li>
+        </ul>
+        <h3>The Rule</h3>
+        <p>Entries: <em>limit</em> when you can. Exits for stops: <em>stop-market</em>. Never a stop-limit for a hard stop on a liquid name — the whole point is to be out.</p>
+        <div class="callout">Your stop is a contract with yourself, not a suggestion. If you move it, you have already lost.</div>
+        <h3>Do This Next</h3>
+        <p>Place both a limit entry and a stop-market exit on a paper trade. Watch how the stop behaves in a fast move. That is what real risk feels like.</p>
+      `
+    },
+    {
+      n: "05",
+      title: "Reading Level 2 & Tape",
+      desc: "Depth of market shows you who is standing where. Time & sales shows you who is hitting.",
+      time: "14 min",
+      level: "Foundation",
+      body: `
+        <h3>Level 2 (DOM)</h3>
+        <p>Shows resting bids and asks at each price. Size on the bid = buyers waiting. Size on the ask = sellers waiting. Watch for <em>size that disappears</em> — a pulled bid means a large buyer just walked away.</p>
+        <h3>Time & Sales</h3>
+        <p>Every print, with size and side. Green = executed at the ask (buyer aggression). Red = executed at the bid (seller aggression). A burst of green prints at the ask = real buying.</p>
+        <h3>Spoofing & Icebergs</h3>
+        <p>Large orders can be fake (spoofing) or hidden (icebergs). You cannot tell which with certainty. What you can tell: whether prints <em>confirm</em> the depth. If the ask is huge but price keeps ticking up, the ask is fake.</p>
+        <div class="callout">Price is truth. Depth is theater. Tape is evidence. Trust tape over depth every time.</div>
+        <h3>Do This Next</h3>
+        <p>Watch one liquid name (SPY, AAPL, NVDA) on Level 2 for a full 15-minute window. Note every time size vanishes right before a move.</p>
+      `
+    },
+    {
+      n: "06",
+      title: "Your First Setup: The Opening Range Breakout",
+      desc: "The market's first 15–30 minutes writes a range. Break it with confirmation and you have a trade.",
+      time: "12 min",
+      level: "Setup",
+      body: `
+        <h3>The Setup</h3>
+        <p>Mark the high and low of the first 15 minutes (9:30–9:45 ET). That is your <em>opening range</em>. A clean break of either edge, with volume, is the signal.</p>
+        <h3>Entry</h3>
+        <ul>
+          <li>Long: break above ORH with a candle that <em>closes</em> above it, on above-average volume.</li>
+          <li>Short: break below ORL with the same confirmation.</li>
+          <li>Enter on the retest if you want a tighter stop.</li>
+        </ul>
+        <h3>Stop</h3>
+        <p>Back inside the range. For a long, that is below the ORH. For a short, above the ORL. Tight, defined, non-negotiable.</p>
+        <h3>Target</h3>
+        <p>Prior day's high/low, premarket high/low, or a measured move equal to the range's height. Take partials at 1R, trail the rest.</p>
+        <div class="callout">The best ORBs happen on days with a catalyst. No news = no conviction = chop.</div>
+        <h3>Do This Next</h3>
+        <p>Backtest 20 sessions of one liquid stock. Mark ORH/ORL. Log every break: did it follow through or fail? The pattern will show itself.</p>
+      `
+    },
+    {
+      n: "07",
+      title: "Risk Per Trade & Position Sizing",
+      desc: "The only math that keeps you in the game. Fixed fractional risk, always.",
+      time: "10 min",
+      level: "Foundation",
+      body: `
+        <h3>The Formula</h3>
+        <p><code>Shares = (Account × Risk%) / (Entry − Stop)</code></p>
+        <p>Example: $25,000 account, 1% risk = $250. Entry $50, stop $48.50 (=$1.50 risk/share). Shares = 250 / 1.50 = <strong>166 shares</strong>.</p>
+        <h3>Why Fixed Fractional</h3>
+        <p>Because it makes every loss the same <em>emotional</em> size. A $250 loss is a $250 loss regardless of the setup. That is what lets you take the next trade without hesitation.</p>
+        <h3>Common Mistakes</h3>
+        <ul>
+          <li>Widening the stop to fit the size, instead of sizing to fit the stop.</li>
+          <li>Doubling size after a loss ("to make it back"). This is how accounts die.</li>
+          <li>Ignoring commission and slippage — subtract both from your R before sizing.</li>
+        </ul>
+        <div class="callout">You are not paid for being right. You are paid for being <em>sized correctly when you are right</em>.</div>
+        <h3>Do This Next</h3>
+        <p>Use the position size calculator in the Toolbox section. Size 10 hypothetical trades. Feel how the number moves with the stop distance.</p>
+      `
+    },
+    {
+      n: "08",
+      title: "The Trading Journal",
+      desc: "If it isn't logged, it didn't happen. Screenshot, thesis, outcome, emotion.",
+      time: "8 min",
+      level: "Foundation",
+      body: `
+        <h3>What to Log</h3>
+        <ul>
+          <li>Date, time, symbol, setup name.</li>
+          <li>Entry, stop, target, actual exit.</li>
+          <li>R multiple (result / risk).</li>
+          <li>Chart screenshot at entry and exit.</li>
+          <li>Emotional state: calm, anxious, tilted, bored.</li>
+        </ul>
+        <h3>What to Review Weekly</h3>
+        <p>Win rate by setup. Average R by setup. Best time of day. Worst time of day. Emotional patterns before your worst trades. The journal is a mirror.</p>
+        <div class="callout">Traders who journal outperform traders who don't, not because journaling is magic, but because it forces honesty.</div>
+        <h3>Do This Next</h3>
+        <p>Build a spreadsheet with the columns above. Log your next 10 paper trades. Read them on Sunday.</p>
+      `
+    }
+  ],
+  advanced: [
+    {
+      n: "09",
+      title: "Market Structure: HH/HL vs LH/LL",
+      desc: "Trends are made of swing points. Learn to read the sequence and you know the bias.",
+      time: "12 min",
+      level: "Structure",
+      body: `
+        <h3>The Pattern</h3>
+        <p>Uptrend = higher highs AND higher lows. Downtrend = lower highs AND lower lows. Anything else = range.</p>
+        <h3>Break of Structure (BOS)</h3>
+        <p>When price takes out the most recent swing high (in an uptrend), that is a BOS — the trend continues. When it takes out the most recent swing <em>low</em>, that is a <strong>change of character</strong> (CHoCH) — the trend may be flipping.</p>
+        <h3>Why It Matters</h3>
+        <p>Every professional structure read comes down to: what is the current sequence, and where would it have to break to invalidate? That invalidation is your stop. That is the whole game.</p>
+        <div class="callout">Trade with structure, not against it. Counter-trend trades are for experts with tight stops and fast exits.</div>
+        <h3>Do This Next</h3>
+        <p>On a 15m chart, mark every swing high and swing low for the last 5 sessions. Label HH/HL/LH/LL. The pattern will become obvious.</p>
+      `
+    },
+    {
+      n: "10",
+      title: "Volume Profile & Value Area",
+      desc: "Price by volume, not time. Shows you where the market agreed on value.",
+      time: "14 min",
+      level: "Analysis",
+      body: `
+        <h3>What It Is</h3>
+        <p>A histogram plotted on the price axis showing how much volume traded at each price. The <strong>POC</strong> (point of control) is the price with the most volume. The <strong>value area</strong> is where 70% of volume traded.</p>
+        <h3>How to Use It</h3>
+        <ul>
+          <li>Price above value area = acceptance higher. Look for longs.</li>
+          <li>Price below value area = acceptance lower. Look for shorts.</li>
+          <li>Price inside value area = balance. Fade the edges, or wait for the break.</li>
+          <li>Low-volume nodes (LVNs) between high-volume nodes act like air pockets — price travels fast.</li>
+        </ul>
+        <div class="callout">Volume profile is not a signal. It is a map. The signal is how price behaves at the map's edges.</div>
+        <h3>Do This Next</h3>
+        <p>Add a volume profile indicator to your chart. Mark POC and VAH/VAL for the last 5 sessions. Note how price reacted on re-touch.</p>
+      `
+    },
+    {
+      n: "11",
+      title: "VWAP: The Institutional Line",
+      desc: "Volume-weighted average price. Where the big money measures itself against.",
+      time: "10 min",
+      level: "Analysis",
+      body: `
+        <h3>What It Is</h3>
+        <p>VWAP = sum(price × volume) / sum(volume), calculated from the open. It is the average price paid by everyone who traded today, weighted by size. Institutions benchmark execution against it.</p>
+        <h3>How to Trade It</h3>
+        <ul>
+          <li>Price above VWAP with VWAP rising = bullish intraday bias.</li>
+          <li>Price below VWAP with VWAP falling = bearish intraday bias.</li>
+          <li>First touch of VWAP from above after a strong open = common long entry.</li>
+          <li>VWAP acts as magnet — price often returns to it before continuing.</li>
+        </ul>
+        <div class="callout">VWAP is not support or resistance in the classical sense. It is a <em>bias filter</em>. Trade on the right side of it.</div>
+        <h3>Do This Next</h3>
+        <p>Add VWAP to your 5m chart. Note every time price touches it. Log the reaction. The pattern is consistent.</p>
+      `
+    },
+    {
+      n: "12",
+      title: "Momentum: RSI, MACD, and Divergence",
+      desc: "Momentum tells you when a move is running out of fuel — before price confirms it.",
+      time: "12 min",
+      level: "Indicator",
+      body: `
+        <h3>RSI</h3>
+        <p>Relative Strength Index, 0–100. Above 70 = overbought, below 30 = oversold. In a strong trend, RSI can stay overbought for hours — do not short just because RSI is high.</p>
+        <h3>MACD</h3>
+        <p>Two EMAs and a histogram. Crossovers signal momentum shifts. The histogram shrinking = momentum fading.</p>
+        <h3>Divergence</h3>
+        <p>Price makes a higher high, momentum makes a lower high = bearish divergence. Price makes a lower low, momentum makes a higher low = bullish divergence. The most reliable divergence is at a key level, on the HTF.</p>
+        <div class="callout">Divergence is a warning, not a signal. Wait for price to confirm — a CHoCH — before acting on it.</div>
+        <h3>Do This Next</h3>
+        <p>Find three examples of divergence on a 1H chart last week. Mark where price confirmed. Note how many candles it took.</p>
+      `
+    },
+    {
+      n: "13",
+      title: "Multi-Timeframe Analysis",
+      desc: "HTF for bias, MTF for setup, LTF for entry. Three charts, one trade.",
+      time: "14 min",
+      level: "Analysis",
+      body: `
+        <h3>The Framework</h3>
+        <ul>
+          <li><strong>HTF (1H or 4H)</strong> — what is the trend? Where are the major levels?</li>
+          <li><strong>MTF (15m)</strong> — where is the setup forming? What is the pattern?</li>
+          <li><strong>LTF (1m or 5m)</strong> — what is the trigger? Where is the tight stop?</li>
+        </ul>
+        <h3>The Rule of Alignment</h3>
+        <p>Trade only when the three align. HTF bullish + MTF pullback into support + LTF bullish trigger = A+ setup. If any leg disagrees, size down or pass.</p>
+        <div class="callout">You are not looking for more trades. You are looking for <em>fewer, better</em> trades.</div>
+        <h3>Do This Next</h3>
+        <p>Pick one instrument. Open 4H, 15m, 5m side by side. Wait for a trade where all three align. It might take three days. Take it on paper.</p>
+      `
+    },
+    {
+      n: "14",
+      title: "Liquidity Sweeps & Stop Hunts",
+      desc: "Price hunts stops before moving. Learn to be the hunter, not the hunted.",
+      time: "12 min",
+      level: "Structure",
+      body: `
+        <h3>The Mechanism</h3>
+        <p>Retail stops cluster above swing highs and below swing lows. Market makers push price through those clusters to fill large orders, then reverse. This is the <em>liquidity sweep</em>.</p>
+        <h3>How to Trade It</h3>
+        <ul>
+          <li>Identify a clear swing high or low with obvious stop territory above/below.</li>
+          <li>Wait for price to sweep it — a fast wick that takes out the level and reverses.</li>
+          <li>Enter on the reversal candle close, stop beyond the wick.</li>
+          <li>Target the opposite side of the range.</li>
+        </ul>
+        <div class="callout">If price approaches a level with obvious stop clusters and <em>does not</em> sweep, that is a sign of strength. Watch for continuation instead.</div>
+        <h3>Do This Next</h3>
+        <p>Mark the prior day's high and low. Note how often they are swept in the first hour before the real move. The data is loud.</p>
+      `
+    },
+    {
+      n: "15",
+      title: "Gap Trading: Fill, Fade, or Follow",
+      desc: "Overnight gaps create the day's first decision. Classify, then trade.",
+      time: "10 min",
+      level: "Setup",
+      body: `
+        <h3>The Three Types</h3>
+        <ul>
+          <li><strong>Common gap</strong> — small, no news. Usually fills. Fade it.</li>
+          <li><strong>Breakaway gap</strong> — on news, high volume. Often follows through. Trade with it.</li>
+          <li><strong>Exhaustion gap</strong> — after a long run, on declining volume. Often reverses. Fade after confirmation.</li>
+        </ul>
+        <h3>Gap Fill Rules</h3>
+        <p>Gaps fill ~70% of the time on liquid names, but the ones that don't fill are the ones that pay. Do not blindly fade every gap. Classify first.</p>
+        <div class="callout">The size of the gap matters. Small gap = noise. Large gap on news = information. Trade information.</div>
+        <h3>Do This Next</h3>
+        <p>Log every gap on 5 liquid names for a week. Classify, then track whether it filled by close. Your personal stats will guide you.</p>
+      `
+    },
+    {
+      n: "16",
+      title: "Trade Management: Scaling and Trailing",
+      desc: "How you exit is as important as how you enter. Rules for partials and trailing stops.",
+      time: "12 min",
+      level: "Execution",
+      body: `
+        <h3>Scaling Out</h3>
+        <p>Standard: take 1/2 at 1R, trail the rest. This locks in a win and lets you hold for the runner. The alternative — hold all for 2R+ — has higher variance but larger average winners. Pick one and stick to it.</p>
+        <h3>Trailing Stops</h3>
+        <ul>
+          <li>Structure trail: move stop to the most recent swing low (longs) or high (shorts).</li>
+          <li>ATR trail: move stop 1.5× ATR behind price. Wider, fewer shakeouts.</li>
+          <li>Time stop: if the trade hasn't done anything in N candles, exit. Dead trades cost attention.</li>
+        </ul>
+        <div class="callout">Never widen a stop. Ever. You can trail it tighter. You cannot give it more room. That is the rule.</div>
+        <h3>Do This Next</h3>
+        <p>Backtest your two favorite setups with both partial-at-1R and hold-for-2R rules. Compare total R. The math will tell you which fits you.</p>
+      `
+    }
+  ],
+  expert: [
+    {
+      n: "17",
+      title: "Order Flow: Footprint & Delta",
+      desc: "Read the transaction-level war. Bid/ask delta reveals real buying vs real selling.",
+      time: "16 min",
+      level: "Order Flow",
+      body: `
+        <h3>Footprint Charts</h3>
+        <p>Each candle is broken into its internal bid/ask volume at each price. You see <em>where</em> within the candle volume traded, and on which side.</p>
+        <h3>Delta</h3>
+        <p>Delta = (buy volume) − (sell volume). Positive delta = net buying. Negative delta = net selling. <strong>Cumulative delta</strong> tracks this across the session — divergence between price and cumulative delta is a warning.</p>
+        <h3>Absorption</h3>
+        <p>When a huge delta pushes into a price and price does <em>not</em> move, someone large is absorbing. This is the signature of institutional accumulation/distribution. It precedes reversals.</p>
+        <div class="callout">Order flow tells you the truth of a move in real time. Price can lie for minutes. Delta cannot lie for seconds.</div>
+        <h3>Do This Next</h3>
+        <p>Add a footprint chart to your platform. Watch the ES or NQ for 30 minutes. Mark every absorption event. Note what price did after.</p>
+      `
+    },
+    {
+      n: "18",
+      title: "Auction Market Theory",
+      desc: "The market is a continuous two-way auction. Balance, imbalance, and the search for value.",
+      time: "14 min",
+      level: "Theory",
+      body: `
+        <h3>The Core Idea</h3>
+        <p>Markets auction up until buyers refuse, then auction down until sellers refuse. They are constantly seeking <em>fair value</em>. When they find it, they balance. When they don't, they trend.</p>
+        <h3>Balance & Imbalance</h3>
+        <ul>
+          <li><strong>Balance</strong> = range, rotation, mean reversion. Fade extremes.</li>
+          <li><strong>Imbalance</strong> = trend, one-timeframing, directional. Trade with it.</li>
+          <li>Transitions from one to the other are where the big moves live.</li>
+        </ul>
+        <h3>Excess</h3>
+        <p>The tail at the end of a move — a long wick that shows aggressive rejection — is called <em>excess</em>. Excess marks the end of an auction. It is one of the most reliable structural signals in the market.</p>
+        <div class="callout">Every trend begins as an imbalance. Every range begins as exhaustion. Read which phase you are in before you trade.</div>
+        <h3>Do This Next</h3>
+        <p>Mark excess tails on the daily chart of ES for the last month. Note how often they become the high or low of a multi-day range.</p>
+      `
+    },
+    {
+      n: "19",
+      title: "Statistical Edges & Expectancy",
+      desc: "Your edge is a number, not a feeling. Compute it, then protect it.",
+      time: "12 min",
+      level: "Quant",
+      body: `
+        <h3>Expectancy</h3>
+        <p><code>E = (WinRate × AvgWin) − (LossRate × AvgLoss)</code></p>
+        <p>Positive expectancy means you profit over a large sample. That is the only thing that matters. Win rate alone is meaningless.</p>
+        <h3>Profit Factor</h3>
+        <p><code>PF = GrossProfit / GrossLoss</code>. Above 1.5 is solid. Above 2.0 is excellent. Below 1.0 = losing system, no matter how it feels.</p>
+        <h3>Sample Size</h3>
+        <p>You need at least 100 trades to trust a statistic. Fewer than that is noise. Do not change a system based on a 5-trade losing streak.</p>
+        <div class="callout">If your system has positive expectancy and you follow it, you will win. If you abandon it during drawdown, you have no system.</div>
+        <h3>Do This Next</h3>
+        <p>Compute expectancy and profit factor for your last 50 trades. If you don't have 50 trades logged, that is your next task — before anything else.</p>
+      `
+    },
+    {
+      n: "20",
+      title: "Options Flow & Dark Pool Prints",
+      desc: "The smart money's footprints. Unusual options activity and dark pool blocks.",
+      time: "14 min",
+      level: "Flow",
+      body: `
+        <h3>Unusual Options Activity (UOA)</h3>
+        <p>Large, out-of-the-money, short-dated options buys that do not fit normal hedging. These are directional bets. Track them, but confirm with price — many are hedges, not bets.</p>
+        <h3>Dark Pool Prints</h3>
+        <p>Off-exchange block trades reported to the tape. Large prints at a specific price often act as magnets or support/resistance. A cluster of dark pool prints at $X means someone large cares about $X.</p>
+        <h3>Gamma Exposure</h3>
+        <p>Dealer gamma positioning affects pinning. High positive gamma = price pins to strikes. Negative gamma = volatility expands. Learn your instrument's gamma profile around monthly OPEX.</p>
+        <div class="callout">Flow is context, not signal. It tells you where the big money is standing. It does not tell you when they will act.</div>
+        <h3>Do This Next</h3>
+        <p>Pull UOA on 3 liquid names each morning for a week. Note which ones followed through. Build a personal hit rate.</p>
+      `
+    },
+    {
+      n: "21",
+      title: "Algo Execution & Iceberg Detection",
+      desc: "How institutions hide size, and how to spot them anyway.",
+      time: "12 min",
+      level: "Flow",
+      body: `
+        <h3>Execution Algos</h3>
+        <ul>
+          <li><strong>TWAP</strong> — time-weighted average price. Executes evenly across time.</li>
+          <li><strong>VWAP</strong> — volume-weighted. Executes in proportion to volume.</li>
+          <li><strong>POV</strong> — percentage of volume. Participates at a fixed rate.</li>
+          <li><strong>Iceberg</strong> — shows only a small tip, refills on fill.</li>
+        </ul>
+        <h3>Detecting Icebergs</h3>
+        <p>Watch for the same size printing repeatedly at the same price, with the visible order not depleting. That is an iceberg refilling. When it finishes, price moves fast in the opposite direction.</p>
+        <h3>Trading Around Them</h3>
+        <p>Do not fight an iceberg. Trade <em>with</em> it until it's exhausted, then prepare for the reversal. The exhaustion is the signal.</p>
+        <div class="callout">The market is not random. It is a machine with visible gears. Learn the gears.</div>
+        <h3>Do This Next</h3>
+        <p>Watch one liquid name's time & sales for 20 minutes. Look for repeated same-size prints. That is an algo. Note the reaction when it stops.</p>
+      `
+    },
+    {
+      n: "22",
+      title: "Regime Detection: Trend vs Chop",
+      desc: "The same setup that prints in a trend dies in chop. Detect the regime first.",
+      time: "12 min",
+      level: "Meta",
+      body: `
+        <h3>Regimes</h3>
+        <ul>
+          <li><strong>Trending</strong> — directional, expanding range, one-timeframing. Trade breakouts and pullbacks.</li>
+          <li><strong>Ranging</strong> — mean-reverting, contracting range, rotation. Fade the edges.</li>
+          <li><strong>Volatile</strong> — expanding range, no direction. Reduce size, widen stops, or stand aside.</li>
+        </ul>
+        <h3>Detection Tools</h3>
+        <ul>
+          <li>ADX above 25 = trending. Below 20 = ranging.</li>
+          <li>ATR expanding = volatility rising.</li>
+          <li>Higher timeframe structure = the final word.</li>
+        </ul>
+        <div class="callout">Most traders lose money by applying a trend strategy in a ranging market. Regime first. Strategy second.</div>
+        <h3>Do This Next</h3>
+        <p>Classify the last 20 sessions on your instrument as trend/range/volatile. Note which of your setups worked in each. That is your playbook.</p>
+      `
+    },
+    {
+      n: "23",
+      title: "Psychology Under Drawdown",
+      desc: "The market will test you. The rules you keep under pressure are the only rules you have.",
+      time: "10 min",
+      level: "Mind",
+      body: `
+        <h3>The Drawdown Cycle</h3>
+        <p>Loss → frustration → size up to recover → bigger loss → fear → size down → miss the recovery → tilt. This is the classic destroyer. Break it early.</p>
+        <h3>Protocols</h3>
+        <ul>
+          <li>Hard daily loss limit: 3% of account. Hit it, close the platform.</li>
+          <li>Hard weekly loss limit: 6%. Hit it, paper trade the rest of the week.</li>
+          <li>After two consecutive losses, halve your size for the rest of the session.</li>
+          <li>After a big win, do not increase size. Same size. Always.</li>
+        </ul>
+        <div class="callout">Your edge exists only if you are around to trade it. Survival is the first strategy.</div>
+        <h3>Do This Next</h3>
+        <p>Write your loss limits on a sticky note. Tape it to your monitor. Enforce them for one full week, no exceptions.</p>
+      `
+    },
+    {
+      n: "24",
+      title: "Building a Repeatable Playbook",
+      desc: "Two to four setups, documented. That is a business, not a hobby.",
+      time: "14 min",
+      level: "Meta",
+      body: `
+        <h3>The Playbook</h3>
+        <p>For each setup, document:</p>
+        <ul>
+          <li><strong>Context</strong> — market regime, timeframe, level proximity.</li>
+          <li><strong>Trigger</strong> — the exact candle, price, or condition that signals entry.</li>
+          <li><strong>Stop</strong> — the invalidation point, defined before entry.</li>
+          <li><strong>Target</strong> — first partial, runner target, trailing rule.</li>
+          <li><strong>Size</strong> — R per trade, max concurrent positions.</li>
+          <li><strong>Invalidation</strong> — what would make you skip the setup entirely.</li>
+        </ul>
+        <h3>Review Cadence</h3>
+        <p>Weekly: stats by setup. Monthly: which setups to keep, which to retire. Quarterly: full system review. The playbook is a living document.</p>
+        <div class="callout">Amateurs collect setups. Professionals master two. Be a professional.</div>
+        <h3>Do This Next</h3>
+        <p>Write one page per setup. Two to four pages total. That is your entire trading business. Everything else is commentary.</p>
+      `
+    }
+  ]
+};
+
+/* ============================================================
+   STOCKS DATA (seeded, simulated live)
+   ============================================================ */
+const STOCKS_SEED = [
+  { symbol: "SPY",  name: "SPDR S&P 500 ETF",       price: 521.44, vol: 68200000 },
+  { symbol: "QQQ",  name: "Invesco QQQ Trust",      price: 448.12, vol: 41200000 },
+  { symbol: "AAPL", name: "Apple Inc.",             price: 189.32, vol: 52400000 },
+  { symbol: "NVDA", name: "NVIDIA Corp.",           price: 892.15, vol: 48200000 },
+  { symbol: "TSLA", name: "Tesla Inc.",             price: 176.48, vol: 92400000 },
+  { symbol: "MSFT", name: "Microsoft Corp.",        price: 415.26, vol: 22100000 },
+  { symbol: "AMZN", name: "Amazon.com Inc.",        price: 182.14, vol: 38700000 },
+  { symbol: "META", name: "Meta Platforms Inc.",    price: 492.88, vol: 18400000 },
+  { symbol: "GOOGL",name: "Alphabet Inc. Class A",  price: 158.42, vol: 24300000 },
+  { symbol: "AMD",  name: "Advanced Micro Devices", price: 168.94, vol: 58200000 },
+  { symbol: "NFLX", name: "Netflix Inc.",           price: 612.33, vol: 4100000 },
+  { symbol: "COIN", name: "Coinbase Global Inc.",   price: 224.18, vol: 12800000 },
+  { symbol: "PLTR", name: "Palantir Technologies",  price: 22.84,  vol: 61200000 },
+  { symbol: "SOFI", name: "SoFi Technologies",      price: 7.42,   vol: 44100000 },
+  { symbol: "F",    name: "Ford Motor Co.",         price: 12.18,  vol: 58400000 },
+  { symbol: "BAC",  name: "Bank of America Corp.",  price: 38.92,  vol: 39800000 }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let marketData = [];
+let sortKey = "symbol";
+let sortDir = 1;
+let filterText = "";
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const fmt = (n, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtVol = (n) => {
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+  return n.toString();
+};
+
+/* ============================================================
+   SEED MARKET DATA + LIVE SIM
+   ============================================================ */
+function seedMarket() {
+  marketData = STOCKS_SEED.map((s) => {
+    const change = (Math.random() - 0.5) * (s.price * 0.03);
+    const spark = Array.from({ length: 40 }, (_, i) => {
+      const base = s.price - change + (change * i) / 39;
+      return base + (Math.random() - 0.5) * s.price * 0.004;
+    });
+    return {
+      ...s,
+      prevPrice: s.price - change,
+      change,
+      changePct: (change / s.price) * 100,
+      spark
+    };
+  });
+}
+
+function tickMarket() {
+  marketData = marketData.map((s) => {
+    const drift = (Math.random() - 0.5) * s.price * 0.0015;
+    const newPrice = Math.max(0.5, s.price + drift);
+    const change = newPrice - s.prevPrice;
+    const spark = [...s.spark.slice(1), newPrice];
+    return {
+      ...s,
+      price: newPrice,
+      change,
+      changePct: (change / s.prevPrice) * 100,
+      spark,
+      vol: s.vol + Math.floor(Math.random() * 200000)
+    };
+  });
+}
+
+/* ============================================================
+   RENDER: TICKER
+   ============================================================ */
+function renderTicker() {
+  const t = $("#ticker");
+  const items = marketData.map((s) => {
+    const cls = s.change >= 0 ? "up" : "down";
+    const sign = s.change >= 0 ? "+" : "";
+    return `<div class="ticker-item ${cls}">
+      <span class="sym">${s.symbol}</span>
+      <span class="px">$${fmt(s.price)}</span>
+      <span class="chg">${sign}${fmt(s.changePct)}%</span>
+    </div>`;
+  }).join("");
+  // duplicate for seamless loop
+  t.innerHTML = items + items;
+}
+
+/* ============================================================
+   RENDER: MARKET TABLE
+   ============================================================ */
+function renderMarket() {
+  const body = $("#marketBody");
+  let rows = [...marketData];
+
+  if (filterText) {
+    const f = filterText.toLowerCase();
+    rows = rows.filter(
+      (s) =>
+        s.symbol.toLowerCase().includes(f) ||
+        s.name.toLowerCase().includes(f)
+    );
+  }
+
+  rows.sort((a, b) => {
+    const av = a[sortKey];
+    const bv = b[sortKey];
+    if (typeof av === "string") return av.localeCompare(bv) * sortDir;
+    return (av - bv) * sortDir;
+  });
+
+  body.innerHTML = rows
+    .map((s) => {
+      const cls = s.change >= 0 ? "up" : "down";
+      const sign = s.change >= 0 ? "+" : "";
+      return `<tr>
+        <td class="sym-cell">${s.symbol}</td>
+        <td class="name-cell">${s.name}</td>
+        <td>$${fmt(s.price)}</td>
+        <td class="${cls}">${sign}${fmt(s.change)}</td>
+        <td class="${cls}">${sign}${fmt(s.changePct)}%</td>
+        <td>${fmtVol(s.vol)}</td>
+        <td>${sparkSVG(s.spark, s.change >= 0)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  $("#lastUpdate").textContent = "updated " + new Date().toLocaleTimeString();
+}
+
+/* ============================================================
+   RENDER: SPARKLINE
+   ============================================================ */
+function sparkSVG(data, up) {
+  const w = 90;
+  const h = 28;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const step = w / (data.length - 1);
+  const pts = data
+    .map((v, i) => `${(i * step).toFixed(1)},${(h - ((v - min) / range) * h).toFixed(1)}`)
+    .join(" ");
+  const color = up ? "#00ffa3" : "#ff4d6d";
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ============================================================
+   RENDER: GUIDES
+   ============================================================ */
+function renderGuides(tier) {
+  const grid = $("#guidesGrid");
+  grid.innerHTML = GUIDES[tier]
+    .map(
+      (g, i) => `
+      <div class="guide-card" data-tier="${tier}" data-idx="${i}">
+        <div class="guide-num">${g.n}</div>
+        <h3>${g.title}</h3>
+        <p>${g.desc}</p>
+        <div class="guide-meta">
+          <span>${g.time}</span>
+          <span>${g.level}</span>
+        </div>
+      </div>`
+    )
+    .join("");
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function openModal(tier, idx) {
+  const g = GUIDES[tier][idx];
+  $("#modalTier").textContent = tier;
+  $("#modalTitle").textContent = g.title;
+  $("#modalBody").innerHTML = g.body;
+  $("#modalBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeModal() {
+  $("#modalBackdrop").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+/* ============================================================
+   TOOLS
+   ============================================================ */
+function updatePositionSize() {
+  const account = parseFloat($("#psAccount").value) || 0;
+  const riskPct = parseFloat($("#psRisk").value) || 0;
+  const entry = parseFloat($("#psEntry").value) || 0;
+  const stop = parseFloat($("#psStop").value) || 0;
+  const out = $("#psOut");
+  const riskPerShare = Math.abs(entry - stop);
+  const dollarRisk = (account * riskPct) / 100;
+  if (riskPerShare <= 0 || dollarRisk <= 0) {
+    out.textContent = "—";
+    out.classList.remove("bad");
+    return;
+  }
+  const shares = Math.floor(dollarRisk / riskPerShare);
+  out.textContent = `${shares} shares · $${fmt(dollarRisk)} risk`;
+  out.classList.toggle("bad", shares <= 0);
+}
+
+function updateRiskReward() {
+  const entry = parseFloat($("#rrEntry").value) || 0;
+  const stop = parseFloat($("#rrStop").value) || 0;
+  const target = parseFloat($("#rrTarget").value) || 0;
+  const out = $("#rrOut");
+  const risk = Math.abs(entry - stop);
+  const reward = Math.abs(target - entry);
+  if (risk <= 0) {
+    out.textContent = "—";
+    out.classList.remove("bad");
+    return;
+  }
+  const rr = reward / risk;
+  out.textContent = `${rr.toFixed(2)} : 1 · ${rr >= 2 ? "valid" : rr >= 1.5 ? "marginal" : "skip"}`;
+  out.classList.toggle("bad", rr < 1.5);
+}
+
+function updateBreakeven() {
+  const reward = parseFloat($("#beReward").value) || 0;
+  const risk = parseFloat($("#beRisk").value) || 0;
+  const out = $("#beOut");
+  if (reward + risk <= 0) {
+    out.textContent = "—";
+    return;
+  }
+  const wr = (risk / (risk + reward)) * 100;
+  out.textContent = `${wr.toFixed(1)}% win rate to break even`;
+  out.classList.toggle("bad", wr > 60);
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+function wire() {
+  // scroll buttons
+  $$("[data-scroll-to]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = document.querySelector(btn.dataset.scrollTo);
+      if (target) target.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  // ticker tabs
+  $$(".tier-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      $$(".tier-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      renderGuides(tab.dataset.tier);
+    });
+  });
+
+  // guide card click (delegated)
+  $("#guidesGrid").addEventListener("click", (e) => {
+    const card = e.target.closest(".guide-card");
+    if (!card) return;
+    openModal(card.dataset.tier, parseInt(card.dataset.idx, 10));
+  });
+
+  // modal close
+  $("#modalClose").addEventListener("click", closeModal);
+  $("#modalBackdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modalBackdrop") closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  // market search
+  $("#searchInput").addEventListener("input", (e) => {
+    filterText = e.target.value;
+    renderMarket();
+  });
+
+  // market sort
+  $$(".market-table thead th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sort;
+      if (sortKey === key) sortDir *= -1;
+      else {
+        sortKey = key;
+        sortDir = 1;
+      }
+      $$(".market-table thead th").forEach((x) => x.classList.remove("sorted"));
+      th.classList.add("sorted");
+      renderMarket();
+    });
+  });
+
+  // tools
+  ["psAccount", "psRisk", "psEntry", "psStop"].forEach((id) =>
+    $("#" + id).addEventListener("input", updatePositionSize)
+  );
+  ["rrEntry", "rrStop", "rrTarget"].forEach((id) =>
+    $("#" + id).addEventListener("input", updateRiskReward)
+  );
+  ["beReward", "beRisk"].forEach((id) =>
+    $("#" + id).addEventListener("input", updateBreakeven)
+  );
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot() {
+  $("#year").textContent = new Date().getFullYear();
+
+  seedMarket();
+  renderTicker();
+  renderMarket();
+  renderGuides("beginner");
+  wire();
+
+  updatePositionSize();
+  updateRiskReward();
+  updateBreakeven();
+
+  // live sim
+  setInterval(() => {
+    tickMarket();
+    renderTicker();
+    renderMarket();
+  }, 4000);
+}
+
+boot();
+</script>
+</body>
+</html>
